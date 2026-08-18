@@ -35,6 +35,23 @@ Para ejecutar las pruebas:
 npm test
 ```
 
+## Migración incremental a .NET 8
+
+La implementación equivalente en .NET 8 se encuentra en `src-dotnet/` y conserva la separación Domain → Application → Infrastructure → API. La aplicación Node.js continúa disponible sin cambios.
+
+Para ejecutar la API .NET:
+
+```bash
+dotnet run --project src-dotnet/OrderFlow.Api
+```
+
+Para compilar y ejecutar sus pruebas:
+
+```bash
+dotnet build src-dotnet/OrderFlow.sln
+dotnet test src-dotnet/OrderFlow.sln
+```
+
 ## API
 
 ### Comprobar el estado de la API
