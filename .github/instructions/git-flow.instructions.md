@@ -2,8 +2,8 @@
 applyTo: "**/*"
 ---
 # Git Flow
-- No trabajes directamente en main.
-- Parte de main actualizado y limpio antes de crear una nueva rama.
+- No trabajes directamente en prod.
+- Parte de prod actualizado y limpio antes de crear una nueva rama.
 - Ejecuta git status antes de agregar archivos.
 - Crea commits pequeños con Conventional Commits.
 - No hagas push si las pruebas fallan.
