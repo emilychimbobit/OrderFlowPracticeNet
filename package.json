@@ -1,0 +1,12 @@
+{
+  "name": "orderflow-copilot-course",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Repositorio transversal para el curso GitHub Copilot Fundamentals",
+  "scripts": {
+    "start": "node src/http/server.js",
+    "test": "node --test"
+  },
+  "engines": { "node": ">=20" }
+}
