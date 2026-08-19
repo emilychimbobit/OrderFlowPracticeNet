@@ -2,50 +2,24 @@
 
 API educativa para gestionar pedidos durante el curso **GitHub Copilot Fundamentals**.
 
-La aplicación está construida con Node.js y utiliza una arquitectura modular que separa el dominio, los servicios, el repositorio y el servidor HTTP.
+La aplicación está construida íntegramente con .NET 8 y C#. Su arquitectura separa Domain → Application → Infrastructure → API.
 
 ## Requisitos
 
-- Node.js 20 o superior
+- .NET SDK 8.0 o superior
 - Git
 - VS Code
 - Extensión GitHub Copilot
 
-## Instalación
-
-Instala las dependencias del proyecto:
-
-```bash
-npm install
-```
-
-Actualmente no hay dependencias externas de producción.
-
 ## Ejecución
-
-```bash
-npm start
-```
-
-La API queda disponible en `http://localhost:3000`.
-
-Para ejecutar las pruebas:
-
-```bash
-npm test
-```
-
-## Migración incremental a .NET 8
-
-La implementación equivalente en .NET 8 se encuentra en `src-dotnet/` y conserva la separación Domain → Application → Infrastructure → API. La aplicación Node.js continúa disponible sin cambios.
-
-Para ejecutar la API .NET:
 
 ```bash
 dotnet run --project src-dotnet/OrderFlow.Api
 ```
 
-Para compilar y ejecutar sus pruebas:
+La URL de la API se muestra en la salida de la aplicación al iniciarse.
+
+Para compilar y ejecutar las pruebas:
 
 ```bash
 dotnet build src-dotnet/OrderFlow.sln
@@ -74,6 +48,14 @@ GET /orders
 
 Devuelve todos los pedidos almacenados en memoria.
 
+Para filtrar por prioridad:
+
+```http
+GET /orders?priority=high
+```
+
+El filtro admite `low` y `high` sin distinguir mayúsculas y minúsculas. Cualquier otro valor devuelve `400 Bad Request`.
+
 ### Crear un pedido
 
 ```http
@@ -89,7 +71,8 @@ Ejemplo de solicitud:
   "amount": 250,
   "isVip": false,
   "requestedAt": "2026-08-14T15:00:00.000Z",
-  "timeZone": "America/Guayaquil"
+  "timeZone": "America/Guayaquil",
+  "priority": "high"
 }
 ```
 
@@ -100,8 +83,26 @@ Campos:
 - `isVip`: indica si el cliente es VIP. Por defecto es `false`.
 - `requestedAt`: fecha de solicitud. Por defecto se utiliza la fecha actual.
 - `timeZone`: zona horaria. Por defecto es `UTC`.
+- `priority`: prioridad `low` o `high`. Por defecto es `low`.
 
-El pedido creado incluye `id`, `customerId`, `amount`, `isVip`, `requestedAt`, `timeZone`, `priority`, `status` y `createdAt`. La prioridad inicial es siempre `normal`.
+La prioridad no distingue mayúsculas y minúsculas en la entrada y siempre se devuelve normalizada como `low` o `high`. Los demás valores devuelven `400 Bad Request`.
+
+El pedido creado incluye `id`, `customerId`, `amount`, `isVip`, `requestedAt`, `timeZone`, `priority`, `status` y `createdAt`.
+
+### Actualizar la prioridad
+
+```http
+PATCH /orders/:id/priority
+Content-Type: application/json
+```
+
+Ejemplo de solicitud:
+
+```json
+{ "priority": "high" }
+```
+
+Si se omite `priority`, la orden conserva su valor actual. Un valor vacío o distinto de `low` y `high` devuelve `400 Bad Request`.
 
 ### Cancelar un pedido
 
@@ -113,25 +114,19 @@ Un pedido cancelado cambia su estado a `cancelled`. Un pedido no puede cancelars
 
 ## Persistencia
 
-Los pedidos se almacenan mediante `InMemoryOrderRepository`, utilizando un `Map` en memoria. Los datos se pierden cuando se detiene o reinicia el proceso de Node.js.
+Los pedidos se almacenan mediante `InMemoryOrderRepository`, utilizando un diccionario en memoria. Los datos se pierden cuando se detiene o reinicia la aplicación.
 
 ## Arquitectura
 
-La aplicación usa ES Modules y el servidor HTTP nativo de Node.js (`node:http`); no utiliza Express.
+El sistema usa .NET 8, C# con tipos anulables habilitados y ASP.NET Core Minimal APIs.
 
 ```text
-src/
-├── domain/
-│   └── order.js
-├── services/
-│   └── orderService.js
-├── repositories/
-│   └── inMemoryOrderRepository.js
-└── http/
-    └── server.js
-
-test/
-└── order.test.js
+src-dotnet/
+├── OrderFlow.Domain/
+├── OrderFlow.Application/
+├── OrderFlow.Infrastructure/
+├── OrderFlow.Api/
+└── OrderFlow.Tests/
 
 docs/
 └── backlog.md
@@ -140,10 +135,10 @@ docs/
 | Capa | Responsabilidad |
 |------|-----------------|
 | **Domain** | Entidad `Order`, validaciones y reglas del dominio |
-| **Services** | Casos de uso para crear, listar y cancelar pedidos |
-| **Repositories** | Almacenamiento de pedidos en memoria |
-| **HTTP** | Servidor HTTP, rutas y respuestas JSON |
-| **Test** | Pruebas automatizadas del dominio y los casos de uso |
+| **Application** | Casos de uso y contrato del repositorio |
+| **Infrastructure** | Almacenamiento de pedidos en memoria |
+| **API** | Rutas HTTP y respuestas JSON |
+| **Tests** | Pruebas automatizadas del dominio, servicio, repositorio y API |
 | **Docs** | Requerimientos y trabajo pendiente |
 
 ## Estado actual
@@ -155,13 +150,13 @@ Implementado:
 - Valores predeterminados para pedidos.
 - Cancelación de pedidos y prevención de cancelaciones duplicadas.
 - Pruebas unitarias del dominio, servicio y repositorio.
+- Pruebas de integración HTTP.
 
 Pendiente:
 
-- Implementar el cálculo real de prioridad.
-- Definir las reglas de cliente VIP, valor del pedido y hora de corte.
+- Definir si la prioridad debe calcularse automáticamente.
+- Definir las posibles reglas de cliente VIP, valor del pedido y hora de corte.
 - Añadir persistencia permanente.
-- Añadir pruebas de integración HTTP.
 
 Consulta [docs/backlog.md](docs/backlog.md) para conocer la historia prioritaria y las preguntas pendientes.
 

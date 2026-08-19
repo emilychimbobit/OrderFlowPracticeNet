@@ -8,12 +8,34 @@ public static class OrderStatuses
     public const string Cancelled = "cancelled";
 }
 
+public static class OrderPriorities
+{
+    public const string Low = "low";
+    public const string High = "high";
+
+    public static string Normalize(string priority)
+    {
+        if (string.Equals(priority, Low, StringComparison.OrdinalIgnoreCase))
+        {
+            return Low;
+        }
+
+        if (string.Equals(priority, High, StringComparison.OrdinalIgnoreCase))
+        {
+            return High;
+        }
+
+        throw new ArgumentException("priority must be 'low' or 'high'");
+    }
+}
+
 public sealed record CreateOrderInput(
     string? CustomerId,
     double Amount,
     bool IsVip = false,
     string? RequestedAt = null,
-    string? TimeZone = null);
+    string? TimeZone = null,
+    string? Priority = null);
 
 public sealed record Order(
     string Id,
@@ -47,10 +69,13 @@ public sealed record Order(
             input.IsVip,
             input.RequestedAt ?? timestamp,
             input.TimeZone ?? "UTC",
-            "normal",
+            input.Priority is null ? OrderPriorities.Low : OrderPriorities.Normalize(input.Priority),
             OrderStatuses.Created,
             timestamp);
     }
+
+    public Order UpdatePriority(string priority) =>
+        this with { Priority = OrderPriorities.Normalize(priority) };
 
     public Order Cancel()
     {

@@ -12,7 +12,7 @@ public sealed class OrderTests
         var order = Order.Create(new CreateOrderInput(" C-1 ", 10), now);
 
         Assert.Equal("C-1", order.CustomerId);
-        Assert.Equal("normal", order.Priority);
+        Assert.Equal(OrderPriorities.Low, order.Priority);
         Assert.Equal(OrderStatuses.Created, order.Status);
         Assert.Equal("2026-01-01T00:00:00.000Z", order.RequestedAt);
         Assert.Equal("2026-01-01T00:00:00.000Z", order.CreatedAt);
@@ -35,6 +35,45 @@ public sealed class OrderTests
             Order.Create(new CreateOrderInput("C-1", 0)));
 
         Assert.Contains("amount", error.Message);
+    }
+
+    [Theory]
+    [InlineData("low", OrderPriorities.Low)]
+    [InlineData("LOW", OrderPriorities.Low)]
+    [InlineData("High", OrderPriorities.High)]
+    [InlineData("high", OrderPriorities.High)]
+    public void Create_NormalizesValidPriority(string priority, string expected)
+    {
+        var order = Order.Create(new CreateOrderInput("C-1", 10, Priority: priority));
+
+        Assert.Equal(expected, order.Priority);
+    }
+
+    [Theory]
+    [InlineData("medium")]
+    [InlineData("normal")]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData("urgent")]
+    public void Create_RejectsInvalidPriority(string priority)
+    {
+        var error = Assert.Throws<ArgumentException>(() =>
+            Order.Create(new CreateOrderInput("C-1", 10, Priority: priority)));
+
+        Assert.Contains("priority", error.Message);
+    }
+
+    [Fact]
+    public void UpdatePriority_NormalizesPriorityWithoutChangingOrder()
+    {
+        var order = Order.Create(new CreateOrderInput("C-1", 10));
+
+        var updated = order.UpdatePriority("HIGH");
+
+        Assert.Equal(OrderPriorities.High, updated.Priority);
+        Assert.Equal(order.Id, updated.Id);
+        Assert.Equal(order.CustomerId, updated.CustomerId);
+        Assert.Equal(order.Status, updated.Status);
     }
 
     [Fact]

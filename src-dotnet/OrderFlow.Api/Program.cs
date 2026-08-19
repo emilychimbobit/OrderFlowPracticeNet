@@ -26,9 +26,12 @@ app.Use(async (context, next) =>
 });
 
 app.MapGet("/health", () => Results.Json(new { status = "ok" }));
-app.MapGet("/orders", (OrderService service) => Results.Json(service.List()));
+app.MapGet("/orders", (string? priority, OrderService service) =>
+	Results.Json(service.List(priority)));
 app.MapPost("/orders", (CreateOrderInput input, OrderService service) =>
 	Results.Json(service.Create(input), statusCode: StatusCodes.Status201Created));
+app.MapPatch("/orders/{id}/priority", (string id, UpdateOrderPriorityInput input, OrderService service) =>
+	Results.Json(service.UpdatePriority(id, input.Priority)));
 app.MapPost("/orders/{id}/cancel", (string id, OrderService service) =>
 	Results.Json(service.Cancel(id)));
 app.MapFallback(() => Results.Json(
@@ -38,3 +41,5 @@ app.MapFallback(() => Results.Json(
 app.Run();
 
 public partial class Program;
+
+public sealed record UpdateOrderPriorityInput(string? Priority);
