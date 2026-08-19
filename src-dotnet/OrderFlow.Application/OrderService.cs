@@ -4,8 +4,25 @@ namespace OrderFlow.Application;
 
 public sealed class OrderService(IOrderRepository repository)
 {
-    public IReadOnlyList<Order> List(string? priority = null)
+    public IReadOnlyList<Order> List(string? priority = null, double? amount = null)
     {
+        if (priority is not null && amount is not null)
+        {
+            throw new ArgumentException("priority and amount filters are mutually exclusive");
+        }
+
+        if (amount is not null)
+        {
+            if (!double.IsFinite(amount.Value) || amount.Value <= 0)
+            {
+                throw new ArgumentException("amount must be greater than zero");
+            }
+
+            return repository.List()
+                .Where(order => order.Amount == amount.Value)
+                .ToArray();
+        }
+
         if (priority is null)
         {
             return repository.List();

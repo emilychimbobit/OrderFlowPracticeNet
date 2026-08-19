@@ -129,6 +129,40 @@ public sealed class OrderApiTests
     }
 
     [Fact]
+    public async Task Orders_FilterByExactAmount()
+    {
+        await using var application = new WebApplicationFactory<Program>();
+        using var client = application.CreateClient();
+        await client.PostAsJsonAsync("/orders", new { customerId = "C-1", amount = 10 });
+        await client.PostAsJsonAsync("/orders", new { customerId = "C-2", amount = 20 });
+        await client.PostAsJsonAsync("/orders", new { customerId = "C-3", amount = 20 });
+
+        var response = await client.GetAsync("/orders?amount=20");
+        var orders = await response.Content.ReadFromJsonAsync<JsonElement>();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(2, orders.GetArrayLength());
+        Assert.All(
+            orders.EnumerateArray(),
+            order => Assert.Equal(20, order.GetProperty("amount").GetDouble()));
+    }
+
+    [Theory]
+    [InlineData("/orders?amount=abc")]
+    [InlineData("/orders?amount=0")]
+    [InlineData("/orders?amount=-5")]
+    [InlineData("/orders?priority=low&amount=10")]
+    public async Task Orders_RejectInvalidAmountFilter(string url)
+    {
+        await using var application = new WebApplicationFactory<Program>();
+        using var client = application.CreateClient();
+
+        var response = await client.GetAsync(url);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
     public async Task UpdatePriority_NormalizesAndPersistsPriority()
     {
         await using var application = new WebApplicationFactory<Program>();

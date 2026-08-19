@@ -26,8 +26,8 @@ app.Use(async (context, next) =>
 });
 
 app.MapGet("/health", () => Results.Json(new { status = "ok" }));
-app.MapGet("/orders", (string? priority, OrderService service) =>
-	Results.Json(service.List(priority)));
+app.MapGet("/orders", (string? priority, double? amount, OrderService service) =>
+	Results.Json(service.List(priority, amount)));
 app.MapPost("/orders", (CreateOrderInput input, OrderService service) =>
 	Results.Json(service.Create(input), statusCode: StatusCodes.Status201Created));
 app.MapPatch("/orders/{id}/priority", (string id, UpdateOrderPriorityInput input, OrderService service) =>

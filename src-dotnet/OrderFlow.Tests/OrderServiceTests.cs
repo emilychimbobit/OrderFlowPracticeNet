@@ -49,6 +49,45 @@ public sealed class OrderServiceTests
     }
 
     [Fact]
+    public void Service_FiltersOrdersByExactAmount()
+    {
+        var service = new OrderService(new InMemoryOrderRepository());
+        service.Create(new("C-1", 10));
+        service.Create(new("C-2", 20));
+        service.Create(new("C-3", 20));
+
+        var matches = service.List(amount: 20);
+
+        Assert.Equal(2, matches.Count);
+        Assert.All(matches, order => Assert.Equal(20, order.Amount));
+    }
+
+    [Fact]
+    public void Service_RejectsAmountAndPriorityCombined()
+    {
+        var service = new OrderService(new InMemoryOrderRepository());
+
+        var error = Assert.Throws<ArgumentException>(() =>
+            service.List(priority: "low", amount: 10));
+
+        Assert.Contains("mutually exclusive", error.Message);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-5)]
+    [InlineData(double.NaN)]
+    [InlineData(double.PositiveInfinity)]
+    public void Service_RejectsInvalidAmountFilter(double amount)
+    {
+        var service = new OrderService(new InMemoryOrderRepository());
+
+        var error = Assert.Throws<ArgumentException>(() => service.List(amount: amount));
+
+        Assert.Contains("amount", error.Message);
+    }
+
+    [Fact]
     public void Service_UpdatesPriorityAndPersistsIt()
     {
         var service = new OrderService(new InMemoryOrderRepository());
