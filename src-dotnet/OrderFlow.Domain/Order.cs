@@ -84,6 +84,16 @@ public sealed record Order(
             throw new InvalidOperationException("order already cancelled");
         }
 
+        if (Priority == OrderPriorities.Low)
+        {
+            throw new InvalidOperationException("order with low priority cannot be cancelled");
+        }
+
+        if (Amount > 1000)
+        {
+            throw new InvalidOperationException("order amount exceeds 1000");
+        }
+
         return this with { Status = OrderStatuses.Cancelled };
     }
 

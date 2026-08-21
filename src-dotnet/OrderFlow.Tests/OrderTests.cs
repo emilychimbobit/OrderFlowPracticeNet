@@ -79,7 +79,7 @@ public sealed class OrderTests
     [Fact]
     public void Cancel_CancelsExistingOrder()
     {
-        var order = Order.Create(new CreateOrderInput("C-1", 10));
+        var order = Order.Create(new CreateOrderInput("C-1", 10, Priority: "high"));
 
         Assert.Equal(OrderStatuses.Cancelled, order.Cancel().Status);
     }
@@ -87,10 +87,46 @@ public sealed class OrderTests
     [Fact]
     public void Cancel_DoesNotCancelTwice()
     {
-        var order = Order.Create(new CreateOrderInput("C-1", 10)).Cancel();
+        var order = Order.Create(new CreateOrderInput("C-1", 10, Priority: "high")).Cancel();
 
         var error = Assert.Throws<InvalidOperationException>(() => order.Cancel());
 
         Assert.Contains("already", error.Message);
+    }
+
+    [Fact]
+    public void Cancel_AllowsWhenAmountEqualsLimit()
+    {
+        var order = Order.Create(new CreateOrderInput("C-1", 1000, Priority: "high"));
+
+        Assert.Equal(OrderStatuses.Cancelled, order.Cancel().Status);
+    }
+
+    [Fact]
+    public void Cancel_RejectsWhenAmountExceedsLimit()
+    {
+        var order = Order.Create(new CreateOrderInput("C-1", 1500, Priority: "high"));
+
+        var error = Assert.Throws<InvalidOperationException>(() => order.Cancel());
+
+        Assert.Contains("exceeds 1000", error.Message);
+    }
+
+    [Fact]
+    public void Cancel_RejectsWhenPriorityIsLow()
+    {
+        var order = Order.Create(new CreateOrderInput("C-1", 10));
+
+        var error = Assert.Throws<InvalidOperationException>(() => order.Cancel());
+
+        Assert.Contains("low priority", error.Message);
+    }
+
+    [Fact]
+    public void Cancel_AllowsWhenPriorityIsHigh()
+    {
+        var order = Order.Create(new CreateOrderInput("C-1", 10, Priority: "HIGH"));
+
+        Assert.Equal(OrderStatuses.Cancelled, order.Cancel().Status);
     }
 }

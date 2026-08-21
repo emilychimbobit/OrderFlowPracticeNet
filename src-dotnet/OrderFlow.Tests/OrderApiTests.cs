@@ -33,14 +33,14 @@ public sealed class OrderApiTests
             isVip = false,
             requestedAt = "2026-08-14T15:00:00.000Z",
             timeZone = "America/Guayaquil",
-            priority = "LOW"
+            priority = "HIGH"
         });
         var created = await createResponse.Content.ReadFromJsonAsync<JsonElement>();
         var id = created.GetProperty("id").GetString();
 
         Assert.Equal(HttpStatusCode.Created, createResponse.StatusCode);
         Assert.Equal("C-100", created.GetProperty("customerId").GetString());
-        Assert.Equal("low", created.GetProperty("priority").GetString());
+        Assert.Equal("high", created.GetProperty("priority").GetString());
         Assert.Equal("created", created.GetProperty("status").GetString());
 
         var orders = await client.GetFromJsonAsync<JsonElement>("/orders");
@@ -237,5 +237,46 @@ public sealed class OrderApiTests
 
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         Assert.Equal("route not found", body.GetProperty("error").GetString());
+    }
+
+    [Fact]
+    public async Task Cancel_ReturnsBadRequestWhenAmountExceedsLimit()
+    {
+        await using var application = new WebApplicationFactory<Program>();
+        using var client = application.CreateClient();
+        var createResponse = await client.PostAsJsonAsync("/orders", new
+        {
+            customerId = "C-1",
+            amount = 1500,
+            priority = "high"
+        });
+        var created = await createResponse.Content.ReadFromJsonAsync<JsonElement>();
+        var id = created.GetProperty("id").GetString();
+
+        var cancelResponse = await client.PostAsync($"/orders/{id}/cancel", null);
+        var body = await cancelResponse.Content.ReadFromJsonAsync<JsonElement>();
+
+        Assert.Equal(HttpStatusCode.BadRequest, cancelResponse.StatusCode);
+        Assert.Equal("order amount exceeds 1000", body.GetProperty("error").GetString());
+    }
+
+    [Fact]
+    public async Task Cancel_ReturnsBadRequestWhenPriorityIsLow()
+    {
+        await using var application = new WebApplicationFactory<Program>();
+        using var client = application.CreateClient();
+        var createResponse = await client.PostAsJsonAsync("/orders", new
+        {
+            customerId = "C-1",
+            amount = 10
+        });
+        var created = await createResponse.Content.ReadFromJsonAsync<JsonElement>();
+        var id = created.GetProperty("id").GetString();
+
+        var cancelResponse = await client.PostAsync($"/orders/{id}/cancel", null);
+        var body = await cancelResponse.Content.ReadFromJsonAsync<JsonElement>();
+
+        Assert.Equal(HttpStatusCode.BadRequest, cancelResponse.StatusCode);
+        Assert.Equal("order with low priority cannot be cancelled", body.GetProperty("error").GetString());
     }
 }

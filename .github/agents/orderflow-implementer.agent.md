@@ -14,6 +14,7 @@ Antes de editar:
 3. Confirma archivos autorizados.
 
 Durante el cambio:
+- Skills permitidas: order-priority-validation
 - modifica solo lo necesario
 - no agregues dependencias
 - no refactorices fuera del alcance
