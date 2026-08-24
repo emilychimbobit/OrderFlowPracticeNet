@@ -58,13 +58,13 @@ La UI de esta carpeta consume exclusivamente `GET /orders` y `POST /orders`, que
 1. Inicia el backend:
 
    ```bash
-   dotnet run --project /home/runner/work/OrderFlowPracticeNet/OrderFlowPracticeNet/src-dotnet/OrderFlow.Api
+   dotnet run --project src-dotnet/OrderFlow.Api
    ```
 
 2. En otra terminal, instala dependencias del frontend:
 
    ```bash
-   cd /home/runner/work/OrderFlowPracticeNet/OrderFlowPracticeNet/src-frontend
+   cd src-frontend
    npm install
    ```
 
