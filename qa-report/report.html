@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OrderFlow QA Report - 2026-08-24</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f6fb;color:#222;padding:24px}
+  h1{font-size:1.7rem;margin-bottom:4px;color:#1a237e}
+  .meta{color:#555;font-size:.9rem;margin-bottom:24px}
+  .summary-cards{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+  .card{background:#fff;border-radius:10px;padding:18px 28px;min-width:140px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+  .card .num{font-size:2.2rem;font-weight:700}
+  .card .lbl{font-size:.8rem;color:#777;text-transform:uppercase;letter-spacing:.05em}
+  .card.pass .num{color:#2e7d32}
+  .card.fail .num{color:#c62828}
+  .card.skip .num{color:#e65100}
+  .card.total .num{color:#1565c0}
+  section{background:#fff;border-radius:10px;padding:20px;margin-bottom:24px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+  h2{font-size:1.1rem;margin-bottom:14px;color:#283593;border-left:4px solid #3949ab;padding-left:10px}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th{background:#e8eaf6;text-align:left;padding:8px 10px;font-weight:600}
+  td{padding:8px 10px;border-bottom:1px solid #f0f0f0}
+  tr:last-child td{border-bottom:none}
+  .badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.78rem;font-weight:600}
+  .badge.pass{background:#e8f5e9;color:#2e7d32}
+  .badge.fail{background:#ffebee;color:#c62828}
+  .badge.skip{background:#fff3e0;color:#e65100}
+  .gallery{display:flex;flex-wrap:wrap;gap:16px}
+  .gallery img{max-width:100%;border-radius:8px;border:1px solid #e0e0e0;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+  .gallery figure{margin:0}
+  .gallery figcaption{font-size:.8rem;color:#777;margin-top:4px;text-align:center}
+  a{color:#3949ab}
+  footer{text-align:center;color:#aaa;font-size:.8rem;margin-top:24px}
+</style>
+</head>
+<body>
+
+<h1>OrderFlow &mdash; Reporte QA</h1>
+<p class="meta">Fecha: 2026-08-24 &nbsp;|&nbsp; Rama: feature/publicar-orderflow &nbsp;|&nbsp; Generado: 2026-08-24T16:35</p>
+
+<div class="summary-cards">
+  <div class="card total"><div class="num">17</div><div class="lbl">Total Tests</div></div>
+  <div class="card pass"><div class="num">17</div><div class="lbl">Passed</div></div>
+  <div class="card fail"><div class="num">0</div><div class="lbl">Failed</div></div>
+  <div class="card skip"><div class="num">0</div><div class="lbl">Skipped</div></div>
+</div>
+
+<section>
+  <h2>Frontend Tests (Vitest)</h2>
+  <table>
+    <thead><tr><th>Suite</th><th>Test</th><th>Estado</th><th>Duración</th></tr></thead>
+    <tbody>
+      <tr><td>ordersClient</td><td>returns parsed orders when the list request succeeds</td><td><span class="badge pass">PASS</span></td><td>23ms</td></tr>
+      <tr><td>ordersClient</td><td>throws the backend error message when create fails</td><td><span class="badge pass">PASS</span></td><td>4ms</td></tr>
+      <tr><td>OrderList</td><td>renders the empty state when no orders are available</td><td><span class="badge pass">PASS</span></td><td>237ms</td></tr>
+      <tr><td>OrderList</td><td>renders order data when orders exist</td><td><span class="badge pass">PASS</span></td><td>58ms</td></tr>
+      <tr><td>OrderList</td><td>renders the error state when an error is provided</td><td><span class="badge pass">PASS</span></td><td>20ms</td></tr>
+      <tr><td>NewOrderForm</td><td>blocks submit when the form is invalid</td><td><span class="badge pass">PASS</span></td><td>359ms</td></tr>
+      <tr><td>NewOrderForm</td><td>submits normalized payload when the form is valid</td><td><span class="badge pass">PASS</span></td><td>1025ms</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:10px;font-size:.83rem;color:#555">3 archivos &bull; 7 tests &bull; Duracion total: ~6.4s &bull; <a href="frontend-results.json">frontend-results.json</a></p>
+</section>
+
+<section>
+  <h2>E2E Tests (Playwright)</h2>
+  <table>
+    <thead><tr><th>Check</th><th>HTTP Status</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>GET /swagger/index.html</td><td>200</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>GET /health</td><td>200</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>GET /orders</td><td>200</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>GET /swagger/v1/swagger.json</td><td>200</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Swagger paths: /health</td><td>-</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Swagger paths: /orders</td><td>-</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Swagger paths: /orders/{id}/priority</td><td>-</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Swagger paths: /orders/{id}/cancel</td><td>-</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Swagger title == "OrderFlow API"</td><td>-</td><td><span class="badge pass">PASS</span></td></tr>
+      <tr><td>Swagger version == "v1"</td><td>-</td><td><span class="badge pass">PASS</span></td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:10px;font-size:.83rem;color:#555">10 checks &bull; <a href="e2e-results.json">e2e-results.json</a></p>
+</section>
+
+<section>
+  <h2>Screenshots</h2>
+  <div class="gallery">
+    <figure>
+      <img src="screenshots/landing-page.png" alt="Landing Page" style="max-width:860px">
+      <figcaption>Landing Page &mdash; http://localhost:5173/</figcaption>
+    </figure>
+    <figure>
+      <img src="screenshots/swagger-ui.png" alt="Swagger UI" style="max-width:860px">
+      <figcaption>Swagger UI &mdash; /swagger/index.html</figcaption>
+    </figure>
+  </div>
+</section>
+
+<footer>OrderFlow QA Report &bull; 2026-08-24 &bull; GitHub Copilot QA Agent</footer>
+</body>
+</html>

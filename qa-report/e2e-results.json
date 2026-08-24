@@ -1,0 +1,55 @@
+{
+  "timestamp": "2026-08-24T21:37:33.422Z",
+  "results": [
+    {
+      "name": "GET /swagger/index.html",
+      "status": 200,
+      "pass": true
+    },
+    {
+      "name": "GET /health",
+      "status": 200,
+      "pass": true
+    },
+    {
+      "name": "GET /orders",
+      "status": 200,
+      "pass": true
+    },
+    {
+      "name": "GET /swagger/v1/swagger.json",
+      "status": 200,
+      "pass": true
+    },
+    {
+      "name": "Swagger paths: /health",
+      "status": "-",
+      "pass": true
+    },
+    {
+      "name": "Swagger paths: /orders",
+      "status": "-",
+      "pass": true
+    },
+    {
+      "name": "Swagger paths: /orders/{id}/priority",
+      "status": "-",
+      "pass": true
+    },
+    {
+      "name": "Swagger paths: /orders/{id}/cancel",
+      "status": "-",
+      "pass": true
+    },
+    {
+      "name": "Swagger title == \"OrderFlow API\"",
+      "status": "-",
+      "pass": true
+    },
+    {
+      "name": "Swagger version == \"v1\"",
+      "status": "-",
+      "pass": true
+    }
+  ]
+}
