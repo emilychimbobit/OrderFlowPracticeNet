@@ -1,0 +1,221 @@
+name: Deploy OrderFlow (Dev)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Entorno destino"
+        type: choice
+        default: dev
+        options: [ dev, staging ]
+  push:
+    branches: [ feature/publicar-orderflow ]
+    paths:
+      - "src-dotnet/**"
+      - "src-frontend/**"
+      - "deploy/**"
+      - ".github/workflows/deploy.yml"
+
+concurrency:
+  group: deploy-${{ github.event.inputs.environment || 'dev' }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write   # OIDC federated credential
+  contents: read
+
+env:
+  DOTNET_VERSION: "8.0.x"
+  NODE_VERSION: "20.x"
+  BUILD_CONFIGURATION: "Release"
+  AZURE_RESOURCE_GROUP: "orderflow-${{ github.event.inputs.environment || 'dev' }}"
+  AZURE_LOCATION: "eastus2"
+  ENVIRONMENT: "${{ github.event.inputs.environment || 'dev' }}"
+
+jobs:
+  build-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    outputs:
+      api-artifact: api-package
+      web-artifact: web-package
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: src-frontend/package-lock.json
+
+      - name: Restore .NET
+        run: dotnet restore src-dotnet/OrderFlow.sln
+
+      - name: Build .NET
+        run: dotnet build src-dotnet/OrderFlow.sln --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+
+      - name: Test .NET
+        run: dotnet test src-dotnet/OrderFlow.sln --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --logger "trx"
+
+      - name: Publish API
+        run: |
+          dotnet publish src-dotnet/OrderFlow.Api/OrderFlow.Api.csproj \
+            --configuration ${{ env.BUILD_CONFIGURATION }} \
+            --output ./publish/api \
+            /p:UseAppHost=false
+
+      - name: Zip API package
+        run: |
+          cd publish/api
+          zip -r ../../api-package.zip .
+
+      - name: Upload API artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-package
+          path: api-package.zip
+          retention-days: 7
+
+      - name: Install frontend deps
+        working-directory: src-frontend
+        run: npm ci
+
+      - name: Test frontend
+        working-directory: src-frontend
+        run: npm test
+
+      - name: Build frontend
+        working-directory: src-frontend
+        run: npm run build
+
+      - name: Upload web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-package
+          path: src-frontend/dist
+          retention-days: 7
+
+  deploy-infra:
+    name: Deploy Infra (Bicep)
+    needs: build-test
+    runs-on: ubuntu-latest
+    outputs:
+      api-name: ${{ steps.deploy.outputs.apiName }}
+      api-hostname: ${{ steps.deploy.outputs.apiDefaultHostname }}
+      swa-name: ${{ steps.deploy.outputs.staticWebAppName }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Ensure Resource Group
+        run: |
+          az group create \
+            --name "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --location "${{ env.AZURE_LOCATION }}" \
+            --tags project=orderflow environment=${{ env.ENVIRONMENT }} managedBy=bicep costCenter=orderflow
+
+      - name: What-if
+        run: |
+          az deployment group what-if \
+            --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --template-file deploy/main.bicep \
+            --parameters deploy/parameters.${{ env.ENVIRONMENT }}.json
+
+      - name: Deploy Bicep
+        id: deploy
+        run: |
+          OUT=$(az deployment group create \
+            --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --template-file deploy/main.bicep \
+            --parameters deploy/parameters.${{ env.ENVIRONMENT }}.json \
+            --name "orderflow-${{ env.ENVIRONMENT }}-${{ github.run_id }}" \
+            --query properties.outputs -o json)
+          echo "apiName=$(echo $OUT | jq -r '.apiName.value')" >> $GITHUB_OUTPUT
+          echo "apiDefaultHostname=$(echo $OUT | jq -r '.apiDefaultHostname.value')" >> $GITHUB_OUTPUT
+          echo "staticWebAppName=$(echo $OUT | jq -r '.staticWebAppName.value')" >> $GITHUB_OUTPUT
+
+  deploy-api:
+    name: Deploy API
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: api-package
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy API package
+        run: |
+          az webapp deploy \
+            --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --name "${{ needs.deploy-infra.outputs.api-name }}" \
+            --src-path api-package.zip \
+            --type zip
+
+      - name: Health check
+        run: |
+          HOST="${{ needs.deploy-infra.outputs.api-hostname }}"
+          for i in 1 2 3 4 5 6; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "https://$HOST/health" || echo "000")
+            echo "Attempt $i: HTTP $code"
+            if [ "$code" = "200" ]; then exit 0; fi
+            sleep 10
+          done
+          echo "Health check failed"
+          exit 1
+
+  deploy-web:
+    name: Deploy Static Web App
+    needs: deploy-infra
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-package
+          path: src-frontend/dist
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get SWA deployment token
+        id: token
+        run: |
+          TOKEN=$(az staticwebapp secrets list \
+            --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --name "${{ needs.deploy-infra.outputs.swa-name }}" \
+            --query "properties.apiKey" -o tsv)
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+
+      - name: Deploy Static Web App
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.token.outputs.token }}
+          action: upload
+          app_location: "src-frontend/dist"
+          skip_app_build: true
+          skip_api_build: true

@@ -1,6 +1,13 @@
 .env
+.env.*
+!.env.example
 coverage/
 *.log
 .vscode/settings.json
 **/bin/
 **/obj/
+publish/
+*.zip
+appsettings.local.json
+appsettings.*.local.json
+.azure/
