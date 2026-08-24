@@ -26,6 +26,28 @@ dotnet build src-dotnet/OrderFlow.sln
 dotnet test src-dotnet/OrderFlow.sln
 ```
 
+## Frontend
+
+El frontend principal vive en [`src-frontend/`](src-frontend/README.md) y consume exclusivamente los endpoints existentes del backend para consultar y registrar pedidos.
+
+Para levantar ambos proyectos en local:
+
+1. Inicia el backend:
+
+   ```bash
+   dotnet run --project src-dotnet/OrderFlow.Api
+   ```
+
+2. En otra terminal, instala y ejecuta el frontend:
+
+   ```bash
+   cd src-frontend
+   npm install
+   npm run dev
+   ```
+
+3. Consulta la guía completa en [`src-frontend/README.md`](src-frontend/README.md), incluyendo endpoints detectados, variable `VITE_API_BASE_URL`, pruebas y compilación.
+
 ## API
 
 ### Comprobar el estado de la API
