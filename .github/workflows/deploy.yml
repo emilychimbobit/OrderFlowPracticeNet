@@ -26,7 +26,7 @@ permissions:
 
 env:
   DOTNET_VERSION: "8.0.x"
-  NODE_VERSION: "20.x"
+  NODE_VERSION: "22.x"
   BUILD_CONFIGURATION: "Release"
   AZURE_RESOURCE_GROUP: "orderflow-${{ github.event.inputs.environment || 'dev' }}"
   AZURE_LOCATION: "eastus2"
