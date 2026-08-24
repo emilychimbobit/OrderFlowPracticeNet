@@ -8,7 +8,6 @@
 ## Calidad
 - Antes de editar, inspecciona patrones existentes
 - Mantén cambios pequeños y trazables
-- Ejecuta build y pruebas relevantes
 - No declares “terminado” con checks fallidos
 
 ## Seguridad
