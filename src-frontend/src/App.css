@@ -1,6 +1,6 @@
 .app-shell {
   min-height: 100vh;
-  background: linear-gradient(180deg, var(--color-bg) 0%, #f5f7fb 100%);
+  background: var(--color-background);
 }
 
 .app-content {
@@ -115,8 +115,12 @@
 
 .button--primary {
   background: var(--color-primary);
-  color: #fff;
+  color: var(--color-primary-contrast);
   box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
+}
+
+.button--primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
 }
 
 .button--secondary {
@@ -128,6 +132,10 @@
 .button--ghost {
   background: rgba(37, 99, 235, 0.08);
   color: var(--color-primary);
+}
+
+.button--ghost:hover:not(:disabled) {
+  background: rgba(37, 99, 235, 0.14);
 }
 
 .button--full {
@@ -163,7 +171,7 @@
   padding: 0.75rem 0.9rem;
   border: 1px solid var(--color-border);
   border-radius: 0.8rem;
-  background: #fff;
+  background: var(--color-surface);
   color: var(--color-text);
   box-sizing: border-box;
 }
@@ -204,12 +212,13 @@
 }
 
 .form-message--success {
-  background: rgba(22, 163, 74, 0.1);
-  color: #166534;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
 }
 
 .form-message--error {
-  background: rgba(220, 38, 38, 0.09);
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
 }
 
 .state {
@@ -219,7 +228,7 @@
   padding: 1.5rem;
   border: 1px dashed var(--color-border);
   border-radius: 1rem;
-  background: rgba(248, 250, 252, 0.7);
+  background: var(--color-background);
 }
 
 .state h3,
@@ -243,7 +252,7 @@
   width: 100%;
   height: 0.95rem;
   border-radius: 999px;
-  background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%);
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-background) 50%, var(--color-border) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.2s infinite linear;
 }
@@ -267,7 +276,7 @@
   padding: 1rem;
   border: 1px solid var(--color-border);
   border-radius: 1rem;
-  background: #fff;
+  background: var(--color-surface);
 }
 
 .order-card__header,
@@ -299,23 +308,23 @@
 }
 
 .badge--priority-high {
-  color: #92400e;
-  background: rgba(245, 158, 11, 0.18);
+  color: var(--color-warning-text);
+  background: var(--color-warning-bg);
 }
 
 .badge--priority-low {
-  color: #1d4ed8;
-  background: rgba(37, 99, 235, 0.12);
+  color: var(--color-info-text);
+  background: var(--color-info-bg);
 }
 
 .badge--status-created {
-  color: #166534;
-  background: rgba(22, 163, 74, 0.12);
+  color: var(--color-success-text);
+  background: var(--color-success-bg);
 }
 
 .badge--status-cancelled {
-  color: #991b1b;
-  background: rgba(220, 38, 38, 0.12);
+  color: var(--color-danger-text);
+  background: var(--color-danger-bg);
 }
 
 .order-card dl {
