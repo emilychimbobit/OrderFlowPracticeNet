@@ -11,7 +11,7 @@ interface OrderListProps {
 }
 
 export function OrderList({ orders, error, onRetry, onCreateClick }: OrderListProps) {
-  if (error && onRetry) {
+  if (error) {
     return <ErrorState message={error} onRetry={onRetry} />
   }
 

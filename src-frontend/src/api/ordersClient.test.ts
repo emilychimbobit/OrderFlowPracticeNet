@@ -33,7 +33,7 @@ describe('ordersClient', () => {
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining('/orders'),
       expect.objectContaining({
-        headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
+        headers: expect.any(Headers),
       }),
     )
     expect(result).toHaveLength(1)

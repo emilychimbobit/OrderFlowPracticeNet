@@ -1,13 +1,11 @@
 import type { CreateOrderInput, Order } from '../types/orders'
 
-const detectedBackendBaseUrl = 'http://localhost:3000'
 const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim()
-const runtimeBaseUrl = configuredBaseUrl && configuredBaseUrl.length > 0
-  ? configuredBaseUrl
-  : detectedBackendBaseUrl
-
-const apiBaseUrl =
-  import.meta.env.DEV && runtimeBaseUrl === detectedBackendBaseUrl ? '/api' : runtimeBaseUrl
+const apiBaseUrl = import.meta.env.DEV
+  ? '/api'
+  : configuredBaseUrl && configuredBaseUrl.length > 0
+    ? configuredBaseUrl
+    : '/api'
 
 interface ErrorPayload {
   error?: string
@@ -24,12 +22,15 @@ export class ApiError extends Error {
 }
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = new Headers(init?.headers)
+
+  if (init?.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
+
   const response = await fetch(`${apiBaseUrl}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      ...init?.headers,
-    },
     ...init,
+    headers,
   })
 
   if (!response.ok) {

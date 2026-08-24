@@ -79,13 +79,15 @@ function validate(values: FormValues): FormErrors {
   return errors
 }
 
-const initialValues: FormValues = {
-  customerId: '',
-  amount: '',
-  priority: 'low',
-  timeZone: getDefaultTimeZone(),
-  requestedAt: '',
-  isVip: false,
+function createInitialValues(): FormValues {
+  return {
+    customerId: '',
+    amount: '',
+    priority: 'low',
+    timeZone: getDefaultTimeZone(),
+    requestedAt: '',
+    isVip: false,
+  }
 }
 
 export function NewOrderForm({
@@ -96,12 +98,12 @@ export function NewOrderForm({
   onCreated,
   onInteract,
 }: NewOrderFormProps) {
-  const [values, setValues] = useState<FormValues>(initialValues)
+  const [values, setValues] = useState<FormValues>(() => createInitialValues())
   const [errors, setErrors] = useState<FormErrors>({})
 
   useEffect(() => {
     if (successOrder) {
-      setValues(initialValues)
+      setValues(createInitialValues())
       setErrors({})
     }
   }, [successOrder])

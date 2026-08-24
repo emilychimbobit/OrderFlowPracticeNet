@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { ApiError, createOrder } from '../api/ordersClient'
 import type { CreateOrderInput, Order } from '../types/orders'
 
@@ -15,7 +15,7 @@ export function useCreateOrder(): CreateOrderState {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function submit(input: CreateOrderInput): Promise<Order | null> {
+  const submit = useCallback(async (input: CreateOrderInput): Promise<Order | null> => {
     setLoading(true)
     setError(null)
 
@@ -34,12 +34,12 @@ export function useCreateOrder(): CreateOrderState {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  function clearFeedback() {
+  const clearFeedback = useCallback(() => {
     setData(null)
     setError(null)
-  }
+  }, [])
 
   return { data, loading, error, submit, clearFeedback }
 }

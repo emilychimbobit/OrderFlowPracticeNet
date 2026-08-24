@@ -51,7 +51,9 @@ La UI de esta carpeta consume exclusivamente `GET /orders` y `POST /orders`, que
 
 - `VITE_API_BASE_URL`
   - Opcional.
-  - Si no se define, la app detecta `http://localhost:3000` como base del backend y, durante `npm run dev`, usa el proxy de Vite mediante `/api` para evitar CORS.
+  - En desarrollo, el frontend siempre llama a `/api` y Vite usa esta variable como destino del proxy para evitar CORS en local.
+  - Si no se define durante `npm run dev`, el proxy apunta por defecto a `http://localhost:3000`, que es el puerto detectado del backend.
+  - Fuera de desarrollo, si no se define, la app usa `/api` sobre el mismo origen.
 
 ## Ejecutar backend y frontend en paralelo
 

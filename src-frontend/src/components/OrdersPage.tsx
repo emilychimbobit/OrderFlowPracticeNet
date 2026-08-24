@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { useCreateOrder } from '../hooks/useCreateOrder'
 import { useOrders } from '../hooks/useOrders'
 import { LoadingState } from './LoadingState'
@@ -16,13 +16,13 @@ export function OrdersPage() {
   } = useCreateOrder()
   const formPanelRef = useRef<HTMLElement | null>(null)
 
-  async function handleCreated() {
+  const handleCreated = useCallback(async () => {
     await refresh()
-  }
+  }, [refresh])
 
-  function focusForm() {
+  const focusForm = useCallback(() => {
     formPanelRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
+  }, [])
 
   return (
     <main className="app-shell">
