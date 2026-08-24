@@ -6,8 +6,23 @@ using OrderFlow.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<IOrderRepository, InMemoryOrderRepository>();
 builder.Services.AddSingleton<OrderService>();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+	options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+	{
+		Title = "OrderFlow API",
+		Version = "v1"
+	});
+});
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+	app.UseSwagger();
+	app.UseSwaggerUI();
+}
 
 app.Use(async (context, next) =>
 {
