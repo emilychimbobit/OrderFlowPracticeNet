@@ -30,6 +30,36 @@ dotnet test src-dotnet/OrderFlow.sln
 
 El frontend principal vive en [`src-frontend/`](src-frontend/README.md) y consume exclusivamente los endpoints existentes del backend para consultar y registrar pedidos.
 
+### Paleta de colores
+
+Los tokens de color están centralizados en `src-frontend/src/index.css` bajo `:root`. Todos los componentes de la pantalla principal usan exclusivamente estos tokens; no hay colores hexadecimales sueltos en los componentes.
+
+| Token | Valor | Uso |
+|-------|-------|-----|
+| `--color-primary` | `#2563EB` | Botones primarios, acentos de marca |
+| `--color-primary-hover` | `#1D4ED8` | Estado hover de botones primarios |
+| `--color-primary-contrast` | `#FFFFFF` | Texto sobre fondo primario |
+| `--color-secondary` | `#0F172A` | Textos fuertes |
+| `--color-background` | `#F8FAFC` | Fondo general de la aplicación |
+| `--color-surface` | `#FFFFFF` | Fondo de tarjetas, formularios e inputs |
+| `--color-border` | `#E2E8F0` | Bordes de inputs, tarjetas y divisores |
+| `--color-text` | `#0F172A` | Texto principal |
+| `--color-muted` | `#475569` | Texto secundario y placeholders |
+| `--color-success` | `#16A34A` | Estado éxito |
+| `--color-success-text` | `#166534` | Texto de éxito sobre fondo claro (AA ≥ 4.5:1) |
+| `--color-success-bg` | `rgba(22,163,74,0.12)` | Fondo de badges y mensajes de éxito |
+| `--color-warning` | `#D97706` | Estado advertencia |
+| `--color-warning-text` | `#92400E` | Texto de advertencia sobre fondo claro (AA ≥ 4.5:1) |
+| `--color-warning-bg` | `rgba(217,119,6,0.18)` | Fondo de badge prioridad alta |
+| `--color-danger` | `#DC2626` | Estado error/cancelado |
+| `--color-danger-text` | `#991B1B` | Texto de error sobre fondo claro (AA ≥ 4.5:1) |
+| `--color-danger-bg` | `rgba(220,38,38,0.12)` | Fondo de badges y mensajes de error |
+| `--color-info` | `#0284C7` | Estado informativo |
+| `--color-info-text` | `#1D4ED8` | Texto informativo sobre fondo claro (AA ≥ 4.5:1) |
+| `--color-info-bg` | `rgba(37,99,235,0.12)` | Fondo de badge prioridad baja |
+
+Todos los pares texto/fondo cumplen contraste WCAG AA (≥ 4.5:1 para texto normal).
+
 Para levantar ambos proyectos en local:
 
 1. Inicia el backend:

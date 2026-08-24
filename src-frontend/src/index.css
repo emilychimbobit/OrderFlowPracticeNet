@@ -1,11 +1,27 @@
 :root {
-  --color-bg: #eef2f7;
-  --color-surface: #ffffff;
+  /* Paleta centralizada OrderFlow */
   --color-primary: #2563eb;
-  --color-danger: #dc2626;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-contrast: #ffffff;
+  --color-secondary: #0f172a;
+  --color-background: #f8fafc;
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
   --color-text: #0f172a;
   --color-muted: #475569;
-  --color-border: #dbe3ef;
+  --color-success: #16a34a;
+  --color-success-text: #166534;
+  --color-success-bg: rgba(22, 163, 74, 0.12);
+  --color-warning: #d97706;
+  --color-warning-text: #92400e;
+  --color-warning-bg: rgba(217, 119, 6, 0.18);
+  --color-danger: #dc2626;
+  --color-danger-text: #991b1b;
+  --color-danger-bg: rgba(220, 38, 38, 0.12);
+  --color-info: #0284c7;
+  --color-info-text: #1d4ed8;
+  --color-info-bg: rgba(37, 99, 235, 0.12);
   font-family: system-ui, sans-serif;
   line-height: 1.5;
   font-weight: 400;
